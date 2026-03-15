@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}ARMM Report &mdash; {{ company | e }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Tier colours */
+  .tier-Explorer { background-color: #6c757d; color: #fff; }
+  .tier-Entry    { background-color: #ffc107; color: #212529; }
+  .tier-Advanced { background-color: #0d6efd; color: #fff; }
+  .tier-Expert   { background-color: #198754; color: #fff; }
+
+  /* Score cell colours */
+  .score-none   { background-color: #fde8e8; }
+  .score-collab { background-color: #fff3cd; }
+  .score-approver { background-color: #cfe2ff; }
+  .score-auto   { background-color: #d1e7dd; }
+
+  /* Domain bar chart */
+  .score-bar {
+    height: 18px;
+    border-radius: 3px;
+    min-width: 4px;
+    background: #0d6efd;
+    display: inline-block;
+    vertical-align: middle;
+    transition: width 0.4s ease;
+  }
+
+  /* Summary cards */
+  .metric-card .metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .metric-card .metric-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #6c757d;
+    margin-top: 0.25rem;
+  }
+
+  /* Recommendation tables */
+  .rec-table th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .rec-table td { font-size: 0.875rem; vertical-align: middle; }
+
+  /* Print */
+  @media print {
+    .tab-content > .tab-pane { display: block !important; opacity: 1 !important; }
+    .nav-tabs { display: none !important; }
+    .accordion-collapse { display: block !important; }
+    .accordion-button::after { display: none; }
+    .no-print { display: none !important; }
+    .page-break { page-break-before: always; }
+    body { background: #fff; font-size: 11pt; }
+    h1,h2,h3,h4,h5 { color: #000 !important; }
+  }
+
+  .report-header {
+    background: linear-gradient(135deg, #1a1f36 0%, #212529 100%);
+    color: #fff;
+    padding: 2.5rem 0 2rem;
+  }
+
+  .effort-Low { color: #198754; font-weight: 600; }
+  .effort-Medium { color: #fd7e14; font-weight: 600; }
+  .effort-High { color: #dc3545; font-weight: 600; }
+  .risk-Low { color: #198754; font-weight: 600; }
+  .risk-Medium { color: #fd7e14; font-weight: 600; }
+  .risk-High { color: #dc3545; font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Report header -->
+<div class="report-header">
+  <div class="container">
+    <p class="text-secondary small mb-1 text-uppercase">AI SOC Maturity Assessment Report</p>
+    <h1 class="h2 fw-bold mb-1">{{ company | e }}</h1>
+    <p class="text-secondary mb-2">Assessment date: {{ date | e }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- Composite Tier -->
+  <div class="text-center mb-5">
+    <p class="text-muted small text-uppercase fw-semibold mb-2">Composite Maturity Tier</p>
+    <span
+      class="badge fs-3 px-4 py-3 tier-{{ overall.composite_tier }}"
+      style="border-radius: 0.5rem;"
+    >
+      {{ overall.composite_tier }}
+    </span>
+    <p class="text-muted small mt-2">
+      {% if overall.composite_tier == "Explorer" %}
+        Your organisation is in the early stages of AI SOC adoption.
+      {% elif overall.composite_tier == "Entry" %}
+        Your organisation has established foundational AI SOC capabilities.
+      {% elif overall.composite_tier == "Advanced" %}
+        Your organisation demonstrates strong AI SOC maturity with broad coverage.
+      {% else %}
+        Your organisation has achieved Expert-level AI SOC automation and coverage.
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Summary metric cards -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-4">
+      <div class="card shadow-sm metric-card text-center py-3">
+        <div class="card-body">
+          <div class="metric-value text-primary">{{ overall.overall_score_pct }}%</div>
+          <div class="metric-label">Overall Weighted Score</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm metric-card text-center py-3">
+        <div class="card-body">
+          <div class="metric-value text-info">{{ overall.coverage_pct }}%</div>
+          <div class="metric-label">Capability Coverage</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm metric-card text-center py-3">
+        <div class="card-body">
+          <div class="metric-value text-success">{{ overall.automation_pct }}%</div>
+          <div class="metric-label">Full Automation</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Domain Breakdown -->
+  <h2 class="h4 fw-bold mb-3">Domain Breakdown</h2>
+  <div class="card shadow-sm mb-5">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Domain</th>
+            <th class="text-center">Score</th>
+            <th class="text-center">Coverage</th>
+            <th class="text-center">Full Auto</th>
+            <th class="text-center">Tier</th>
+            <th style="min-width:150px;">Visual</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for domain_id, domain_result in overall.domains.items() %}
+          {% set domain = domains[domain_id] %}
+          <tr>
+            <td class="fw-semibold">{{ domain.name }}</td>
+            <td class="text-center">{{ domain_result.weighted_score_pct }}%</td>
+            <td class="text-center">{{ domain_result.coverage_pct }}%</td>
+            <td class="text-center">{{ domain_result.automation_pct }}%</td>
+            <td class="text-center">
+              <span class="badge tier-{{ domain_result.tier }}">
+                {{ domain_result.tier }}
+              </span>
+            </td>
+            <td>
+              <div style="background:#e9ecef;border-radius:3px;height:18px;width:100%;">
+                <div
+                  class="score-bar"
+                  style="width: {{ domain_result.weighted_score_pct }}%;"
+                ></div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <h2 class="h4 fw-bold mb-1">Recommendations</h2>
+  <p class="text-muted small mb-3">
+    Current tier: <strong>{{ recommendations.current_tier }}</strong>
+    &nbsp;&rarr;&nbsp;
+    Target tier: <strong>{{ recommendations.target_tier }}</strong>
+  </p>
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-body p-0">
+      <!-- Tabs -->
+      <ul class="nav nav-tabs px-3 pt-2 no-print" id="recTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-qw" data-bs-toggle="tab" data-bs-target="#pane-qw" type="button" role="tab">
+            Quick Wins
+            <span class="badge bg-success ms-1">{{ recommendations.quick_wins | length }}</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-nt" data-bs-toggle="tab" data-bs-target="#pane-nt" type="button" role="tab">
+            Next Tier Actions
+            <span class="badge bg-primary ms-1">{{ recommendations.next_tier | length }}</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-au" data-bs-toggle="tab" data-bs-target="#pane-au" type="button" role="tab">
+            Automation Upgrades
+            <span class="badge bg-info text-dark ms-1">{{ recommendations.automation_upgrades | length }}</span>
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content p-3">
+
+        <!-- Quick Wins -->
+        <div class="tab-pane fade show active" id="pane-qw" role="tabpanel">
+          <p class="text-muted small mb-2">
+            Capabilities not yet implemented with low operational risk &mdash; safe starting points.
+          </p>
+          {% if recommendations.quick_wins %}
+          <div class="table-responsive">
+            <table class="table table-sm rec-table mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Domain</th>
+                  <th>Action</th>
+                  <th class="text-center">Current</th>
+                  <th class="text-center">Suggested</th>
+                  <th class="text-center">Effort</th>
+                  <th class="text-center">Risk</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in recommendations.quick_wins %}
+                <tr>
+                  <td>{{ item.domain_name }}</td>
+                  <td>{{ item.action_name }}</td>
+                  <td class="text-center"><span class="badge bg-secondary">{{ item.current_score }}</span></td>
+                  <td class="text-center"><span class="badge bg-success">{{ item.suggested_score }}</span></td>
+                  <td class="text-center"><span class="effort-{{ item.effort }}">{{ item.effort }}</span></td>
+                  <td class="text-center"><span class="risk-{{ item.risk }}">{{ item.risk }}</span></td>
+                  <td class="text-muted">{{ item.reason }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-center text-muted py-3">No quick wins identified &mdash; great work!</p>
+          {% endif %}
+        </div>
+
+        <!-- Next Tier -->
+        <div class="tab-pane fade" id="pane-nt" role="tabpanel">
+          <p class="text-muted small mb-2">
+            Actions that will help your organisation progress to the
+            <strong>{{ recommendations.target_tier }}</strong> tier.
+          </p>
+          {% if recommendations.next_tier %}
+          <div class="table-responsive">
+            <table class="table table-sm rec-table mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Domain</th>
+                  <th>Action</th>
+                  <th class="text-center">Current</th>
+                  <th class="text-center">Suggested</th>
+                  <th class="text-center">Effort</th>
+                  <th class="text-center">Risk</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in recommendations.next_tier %}
+                <tr>
+                  <td>{{ item.domain_name }}</td>
+                  <td>{{ item.action_name }}</td>
+                  <td class="text-center"><span class="badge bg-secondary">{{ item.current_score }}</span></td>
+                  <td class="text-center"><span class="badge bg-primary">{{ item.suggested_score }}</span></td>
+                  <td class="text-center"><span class="effort-{{ item.effort }}">{{ item.effort }}</span></td>
+                  <td class="text-center"><span class="risk-{{ item.risk }}">{{ item.risk }}</span></td>
+                  <td class="text-muted">{{ item.reason }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-center text-muted py-3">
+            {% if recommendations.current_tier == recommendations.target_tier %}
+            You have reached the highest tier. Maintain and refine your capabilities.
+            {% else %}
+            No specific next-tier actions identified.
+            {% endif %}
+          </p>
+          {% endif %}
+        </div>
+
+        <!-- Automation Upgrades -->
+        <div class="tab-pane fade" id="pane-au" role="tabpanel">
+          <p class="text-muted small mb-2">
+            Capabilities currently in Collaborative or Guide mode that could be upgraded
+            to Approver or fully Automated.
+          </p>
+          {% if recommendations.automation_upgrades %}
+          <div class="table-responsive">
+            <table class="table table-sm rec-table mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Domain</th>
+                  <th>Action</th>
+                  <th class="text-center">Current</th>
+                  <th class="text-center">Suggested</th>
+                  <th class="text-center">Effort</th>
+                  <th class="text-center">Risk</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in recommendations.automation_upgrades %}
+                <tr>
+                  <td>{{ item.domain_name }}</td>
+                  <td>{{ item.action_name }}</td>
+                  <td class="text-center"><span class="badge bg-warning text-dark">{{ item.current_score }}</span></td>
+                  <td class="text-center"><span class="badge bg-info text-dark">{{ item.suggested_score }}</span></td>
+                  <td class="text-center"><span class="effort-{{ item.effort }}">{{ item.effort }}</span></td>
+                  <td class="text-center"><span class="risk-{{ item.risk }}">{{ item.risk }}</span></td>
+                  <td class="text-muted">{{ item.reason }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-center text-muted py-3">No automation upgrades available. All active capabilities are at maximum level.</p>
+          {% endif %}
+        </div>
+
+      </div><!-- /.tab-content -->
+    </div>
+  </div>
+
+  <!-- Full Capability Detail -->
+  <h2 class="h4 fw-bold mb-3 page-break">Full Capability Detail</h2>
+  <p class="text-muted small mb-3">
+    Colour coding:
+    <span class="badge" style="background:#fde8e8;color:#555;border:1px solid #ddd;">0 - Not Available</span>
+    <span class="badge ms-1" style="background:#fff3cd;color:#555;border:1px solid #ddd;">1C / 1G - Partial</span>
+    <span class="badge ms-1" style="background:#cfe2ff;color:#0a3e8e;border:1px solid #ddd;">1A - Approver</span>
+    <span class="badge ms-1" style="background:#d1e7dd;color:#0a3622;border:1px solid #ddd;">2 - Automated</span>
+  </p>
+
+  <div class="accordion shadow-sm mb-5" id="detailAccordion">
+    {% for domain_id, domain_result in overall.domains.items() %}
+    {% set domain = domains[domain_id] %}
+    {% set action_score_map = score_maps[domain_id] %}
+
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="detail-heading-{{ domain_id }}">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#detail-collapse-{{ domain_id }}"
+          aria-expanded="false"
+        >
+          {{ domain.name }}
+          &nbsp;
+          <span class="badge tier-{{ domain_result.tier }} ms-2">{{ domain_result.tier }}</span>
+          <span class="ms-2 text-muted small fw-normal">
+            &mdash; Score: {{ domain_result.weighted_score_pct }}% &nbsp;|&nbsp;
+            Coverage: {{ domain_result.coverage_pct }}% &nbsp;|&nbsp;
+            Auto: {{ domain_result.automation_pct }}%
+          </span>
+        </button>
+      </h2>
+      <div
+        id="detail-collapse-{{ domain_id }}"
+        class="accordion-collapse collapse"
+        aria-labelledby="detail-heading-{{ domain_id }}"
+      >
+        <div class="accordion-body p-0">
+          <table class="table table-sm mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Capability</th>
+                <th class="text-center" style="width:120px;">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for action in domain.actions %}
+              {% set sc = action_score_map.get(action.id, '0') %}
+              {% if sc == '0' %}
+                {% set row_class = 'score-none' %}
+              {% elif sc in ('1C', '1G') %}
+                {% set row_class = 'score-collab' %}
+              {% elif sc == '1A' %}
+                {% set row_class = 'score-approver' %}
+              {% else %}
+                {% set row_class = 'score-auto' %}
+              {% endif %}
+              <tr class="{{ row_class }}">
+                <td>{{ action.name }}</td>
+                <td class="text-center fw-semibold">
+                  {% if sc == '0' %}
+                    <span class="text-muted">Not Available</span>
+                  {% elif sc == '1C' %}
+                    <span>1C &mdash; Collaborative</span>
+                  {% elif sc == '1G' %}
+                    <span>1G &mdash; Guide</span>
+                  {% elif sc == '1A' %}
+                    <span class="text-primary">1A &mdash; Approver</span>
+                  {% else %}
+                    <span class="text-success">2 &mdash; Automated</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Action buttons -->
+  <div class="d-flex gap-3 justify-content-center flex-wrap mb-5 no-print">
+    <button class="btn btn-outline-dark btn-lg px-4" onclick="window.print()">
+      Print Report
+    </button>
+    <a href="{{ url_for('assess') }}" class="btn btn-outline-secondary btn-lg px-4">
+      New Assessment
+    </a>
+    <a href="{{ url_for('export') }}" class="btn btn-outline-primary btn-lg px-4">
+      Export JSON
+    </a>
+  </div>
+
+</div><!-- /.container -->
+{% endblock %}

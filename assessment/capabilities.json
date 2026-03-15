@@ -1,0 +1,128 @@
+{
+  "domains": {
+    "identity": {
+      "name": "Identity Response Plane",
+      "actions": [
+        {"id": "reset_password_std",       "name": "Reset Password (Standard)",   "ref": {"T":3,"C":1,"I":2}},
+        {"id": "reset_password_vip",       "name": "Reset Password (VIP)",        "ref": {"T":3,"C":2,"I":3}},
+        {"id": "revoke_sessions",          "name": "Revoke Sessions",             "ref": {"T":3,"C":1,"I":1}},
+        {"id": "disable_user",             "name": "Disable User",                "ref": {"T":3,"C":1,"I":2}},
+        {"id": "disable_service_principal","name": "Disable Service Principals",  "ref": {"T":2,"C":2,"I":3}},
+        {"id": "remove_permissions",       "name": "Remove Permissions",          "ref": {"T":2,"C":2,"I":3}},
+        {"id": "group_adherence",          "name": "Group Adherence",             "ref": {"T":3,"C":1,"I":1}},
+        {"id": "group_creation",           "name": "Group Creation",              "ref": {"T":3,"C":2,"I":2}},
+        {"id": "token_rotation",           "name": "Token Rotation (Prod)",       "ref": {"T":2,"C":3,"I":3}},
+        {"id": "delete_sharing_perms",     "name": "Delete Sharing Permissions",  "ref": {"T":2,"C":2,"I":2}},
+        {"id": "label_user",               "name": "Label User (Tagging)",        "ref": {"T":3,"C":1,"I":1}}
+      ]
+    },
+    "network": {
+      "name": "Network Response Plane",
+      "actions": [
+        {"id": "acl_creation",             "name": "ACL Creation",                "ref": {"T":2,"C":2,"I":2}},
+        {"id": "vlan_creation",            "name": "VLAN Creation",               "ref": {"T":3,"C":2,"I":2}},
+        {"id": "firewall_rule_creation",   "name": "Firewall Rule Creation",      "ref": {"T":2,"C":1,"I":3}},
+        {"id": "ips_rule_creation",        "name": "IPS Rule Creation",           "ref": {"T":2,"C":2,"I":3}},
+        {"id": "network_connection_reset", "name": "Network Connection Reset",    "ref": {"T":3,"C":1,"I":1}},
+        {"id": "dns_entry_change",         "name": "DNS Entry Change",            "ref": {"T":2,"C":2,"I":2}},
+        {"id": "routing_table_change",     "name": "Routing Table Change",        "ref": {"T":3,"C":3,"I":3}},
+        {"id": "sinkhole_traffic",         "name": "Sinkhole Traffic",            "ref": {"T":3,"C":1,"I":1}},
+        {"id": "rate_limit_traffic",       "name": "Rate Limit Traffic",          "ref": {"T":3,"C":1,"I":1}},
+        {"id": "vlan_modification",        "name": "VLAN Modification",           "ref": {"T":3,"C":2,"I":3}},
+        {"id": "quarantine_device_net",    "name": "Quarantine Device (Network)", "ref": {"T":3,"C":1,"I":2}},
+        {"id": "quarantine_server",        "name": "Quarantine Server",           "ref": {"T":2,"C":3,"I":3}},
+        {"id": "modify_nat_rules",         "name": "Modify NAT Rules",            "ref": {"T":2,"C":2,"I":2}}
+      ]
+    },
+    "endpoint": {
+      "name": "Endpoint Response Plane",
+      "actions": [
+        {"id": "isolate_device",           "name": "Isolate Device",              "ref": {"T":3,"C":2,"I":3}},
+        {"id": "initiate_malware_scan",    "name": "Initiate Malware Scan",       "ref": {"T":3,"C":1,"I":1}},
+        {"id": "grab_file",                "name": "Grab File from Device",       "ref": {"T":3,"C":1,"I":1}},
+        {"id": "submit_to_sandbox",        "name": "Submit File to Sandbox",      "ref": {"T":3,"C":1,"I":1}},
+        {"id": "lock_out_user",            "name": "Lock Out User",               "ref": {"T":2,"C":2,"I":2}},
+        {"id": "remove_user_from_device",  "name": "Remove User from Device",     "ref": {"T":2,"C":2,"I":3}},
+        {"id": "delete_files",             "name": "Delete Files",                "ref": {"T":2,"C":2,"I":2}},
+        {"id": "kill_processes",           "name": "Kill Processes",              "ref": {"T":3,"C":1,"I":2}},
+        {"id": "remove_application",       "name": "Remove Application",          "ref": {"T":2,"C":2,"I":3}},
+        {"id": "remove_browser_ext",       "name": "Remove Browser Extension",    "ref": {"T":3,"C":1,"I":2}},
+        {"id": "modify_browser_settings",  "name": "Modify Browser Settings",     "ref": {"T":2,"C":2,"I":2}},
+        {"id": "remove_scheduled_task",    "name": "Remove Scheduled Task",       "ref": {"T":2,"C":2,"I":2}},
+        {"id": "remove_startup_items",     "name": "Remove Startup Items",        "ref": {"T":2,"C":2,"I":2}},
+        {"id": "remove_library",           "name": "Remove Library / Package",    "ref": {"T":2,"C":2,"I":3}},
+        {"id": "upgrade_application",      "name": "Upgrade Application",         "ref": {"T":2,"C":3,"I":3}},
+        {"id": "upgrade_os",               "name": "Upgrade OS",                  "ref": {"T":2,"C":3,"I":3}},
+        {"id": "deploy_script",            "name": "Deploy Script",               "ref": {"T":3,"C":3,"I":3}},
+        {"id": "modify_registry_key",      "name": "Modify Registry Key",         "ref": {"T":2,"C":3,"I":3}},
+        {"id": "disable_service",          "name": "Disable Service",             "ref": {"T":2,"C":2,"I":2}},
+        {"id": "collect_memory_dump",      "name": "Collect Memory Dump",         "ref": {"T":2,"C":2,"I":1}},
+        {"id": "clear_browser_cache",      "name": "Clear Browser Cache",         "ref": {"T":3,"C":1,"I":1}},
+        {"id": "remove_device_from_domain","name": "Remove Device from Domain",   "ref": {"T":2,"C":3,"I":3}},
+        {"id": "block_file_hash",          "name": "Block File (via Hash)",       "ref": {"T":3,"C":1,"I":2}}
+      ]
+    },
+    "cloud": {
+      "name": "Cloud Response Plane",
+      "actions": [
+        {"id": "modify_security_group",    "name": "Modify Security Group Rules", "ref": {"T":2,"C":2,"I":2}},
+        {"id": "create_security_group",    "name": "Create Security Group",       "ref": {"T":2,"C":2,"I":2}},
+        {"id": "isolate_resource",         "name": "Isolate Resource",            "ref": {"T":3,"C":2,"I":3}},
+        {"id": "modify_access_type",       "name": "Modify Access Type",          "ref": {"T":2,"C":2,"I":3}},
+        {"id": "remove_resource_perms",    "name": "Remove Permissions to Resource","ref": {"T":2,"C":2,"I":2}},
+        {"id": "delete_resource",          "name": "Delete Resource",             "ref": {"T":2,"C":3,"I":3}},
+        {"id": "stop_resource",            "name": "Stop Resource",               "ref": {"T":3,"C":1,"I":2}},
+        {"id": "modify_keyvault",          "name": "Modify KeyVault Entries",     "ref": {"T":2,"C":3,"I":3}},
+        {"id": "use_breakglass",           "name": "Use Breakglass Account",      "ref": {"T":2,"C":3,"I":3}},
+        {"id": "remove_files_storage",     "name": "Remove Files from Storage",   "ref": {"T":2,"C":2,"I":3}},
+        {"id": "copy_storage_device",      "name": "Copy Storage Device",         "ref": {"T":2,"C":2,"I":2}},
+        {"id": "mount_storage_device",     "name": "Mount Storage Device",        "ref": {"T":2,"C":2,"I":2}},
+        {"id": "snapshot_vm",              "name": "Snapshot VM",                 "ref": {"T":3,"C":1,"I":1}},
+        {"id": "enable_diagnostic",        "name": "Enable Diagnostic Settings",  "ref": {"T":3,"C":1,"I":1}},
+        {"id": "apply_resource_lock",      "name": "Apply Resource Lock",         "ref": {"T":3,"C":1,"I":1}}
+      ]
+    },
+    "saas": {
+      "name": "SaaS Response Plane",
+      "actions": [
+        {"id": "delete_email",             "name": "Delete Email",                "ref": {"T":3,"C":1,"I":2}},
+        {"id": "quarantine_email",         "name": "Quarantine Email",            "ref": {"T":3,"C":1,"I":1}},
+        {"id": "create_routing_rules",     "name": "Create Routing Rules",        "ref": {"T":2,"C":2,"I":2}},
+        {"id": "grab_email_sample",        "name": "Grab Email Sample",           "ref": {"T":3,"C":1,"I":1}},
+        {"id": "grab_email_link",          "name": "Grab Email Link",             "ref": {"T":3,"C":1,"I":1}},
+        {"id": "add_remove_meeting",       "name": "Add / Remove Meeting Invite", "ref": {"T":3,"C":1,"I":1}},
+        {"id": "read_modify_user_status",  "name": "Read / Modify User Status",   "ref": {"T":2,"C":2,"I":2}},
+        {"id": "disable_inbox_rule",       "name": "Disable Malicious Inbox Rule","ref": {"T":3,"C":1,"I":2}},
+        {"id": "block_sender",             "name": "Block Sender",                "ref": {"T":3,"C":1,"I":2}},
+        {"id": "modify_hr_records",        "name": "Modify HR Records",           "ref": {"T":2,"C":3,"I":3}}
+      ]
+    },
+    "general": {
+      "name": "General Options / Usability",
+      "actions": [
+        {"id": "close_alerts_siem",        "name": "Close Alerts in SIEM",        "ref": {"T":2,"C":1,"I":1}},
+        {"id": "logging",                  "name": "Logging",                     "ref": {"T":2,"C":1,"I":1}},
+        {"id": "reasoning_logging",        "name": "Reasoning Logging",           "ref": {"T":2,"C":1,"I":1}},
+        {"id": "api_development",          "name": "API Development",             "ref": {"T":2,"C":2,"I":1}},
+        {"id": "support_level",            "name": "Support Level",               "ref": {"T":1,"C":1,"I":1}},
+        {"id": "account_management",       "name": "Account Management",          "ref": {"T":2,"C":1,"I":1}},
+        {"id": "roles_rbac",               "name": "Roles and Responsibility (RBAC)","ref": {"T":2,"C":1,"I":1}},
+        {"id": "ease_of_use",              "name": "Ease of Use (GUI)",           "ref": {"T":1,"C":1,"I":1}},
+        {"id": "native_chat_integration",  "name": "Native Chat Integration",     "ref": {"T":2,"C":1,"I":1}},
+        {"id": "alerting",                 "name": "Alerting",                    "ref": {"T":2,"C":1,"I":1}},
+        {"id": "stats_dashboards",         "name": "Stats / Health Dashboards",   "ref": {"T":2,"C":1,"I":1}},
+        {"id": "byom",                     "name": "Bring Your Own Model",        "ref": {"T":3,"C":3,"I":1}},
+        {"id": "context_grounding",        "name": "Context Grounding",           "ref": {"T":3,"C":2,"I":1}},
+        {"id": "autonomous_thresholds",    "name": "Autonomous Action Thresholds","ref": {"T":3,"C":2,"I":1}},
+        {"id": "investigation_audit",      "name": "Investigation Audit Trail",   "ref": {"T":2,"C":1,"I":1}},
+        {"id": "ir_metrics",               "name": "IR Metrics Tracking",         "ref": {"T":2,"C":2,"I":1}},
+        {"id": "feedback_loop",            "name": "Feedback Loop Mechanism",     "ref": {"T":3,"C":2,"I":1}},
+        {"id": "auto_close_reversal",      "name": "Auto-Close Reversal Tracking","ref": {"T":2,"C":2,"I":1}},
+        {"id": "explainability",           "name": "Explainability",              "ref": {"T":3,"C":1,"I":1}},
+        {"id": "ai_accuracy_reporting",    "name": "AI Decision Accuracy Reporting","ref": {"T":2,"C":2,"I":1}},
+        {"id": "model_drift",              "name": "Model Drift Detection",       "ref": {"T":3,"C":3,"I":1}},
+        {"id": "adversarial_robustness",   "name": "Adversarial Robustness Testing","ref": {"T":3,"C":3,"I":1}}
+      ]
+    }
+  }
+}

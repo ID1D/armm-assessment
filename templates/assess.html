@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}ARMM Assessment &mdash; Questionnaire{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Score radio buttons */
+  .score-group {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: nowrap;
+  }
+  .score-option input[type="radio"] {
+    display: none;
+  }
+  .score-option label {
+    cursor: pointer;
+    padding: 0.3rem 0.55rem;
+    border-radius: 0.375rem;
+    border: 2px solid #dee2e6;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.12s ease;
+    background: #fff;
+    user-select: none;
+  }
+  .score-option label:hover {
+    border-color: #6c757d;
+    background: #f8f9fa;
+  }
+  .score-option input[type="radio"]:checked + label {
+    border-color: #0d6efd;
+    background: #e7f0ff;
+    color: #0a3e8e;
+  }
+  /* Score-specific colours when selected */
+  .score-option input[value="0"]:checked + label {
+    border-color: #adb5bd;
+    background: #e9ecef;
+    color: #495057;
+  }
+  .score-option input[value="1C"]:checked + label {
+    border-color: #fd7e14;
+    background: #fff3cd;
+    color: #664d03;
+  }
+  .score-option input[value="1G"]:checked + label {
+    border-color: #ffc107;
+    background: #fff3cd;
+    color: #664d03;
+  }
+  .score-option input[value="1A"]:checked + label {
+    border-color: #0d6efd;
+    background: #cfe2ff;
+    color: #0a3e8e;
+  }
+  .score-option input[value="2"]:checked + label {
+    border-color: #198754;
+    background: #d1e7dd;
+    color: #0a3622;
+  }
+
+  /* Action rows */
+  .action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 1rem;
+  }
+  .action-row:last-child {
+    border-bottom: none;
+  }
+  .action-name {
+    min-width: 220px;
+    font-size: 0.9rem;
+  }
+
+  /* Fixed bottom bar */
+  #bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #212529;
+    color: #fff;
+    padding: 0.75rem 1rem;
+    z-index: 1050;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.35);
+  }
+  #bottom-bar .progress {
+    height: 8px;
+  }
+  body {
+    padding-bottom: 100px;
+  }
+
+  /* Accordion header badges */
+  .domain-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .accordion-button {
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="mb-4">
+    <h1 class="h3 fw-bold">AI SOC Maturity Assessment</h1>
+    <p class="text-muted">
+      Rate each capability using the five-level ARMM scale. Not Available (0) is pre-selected.
+      Complete at least one capability above zero to generate your report.
+    </p>
+  </div>
+
+  <form method="POST" action="{{ url_for('assess_post') }}" id="assess-form">
+
+    <!-- Organisation details -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-dark text-white fw-semibold">Organisation Details</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="company" class="form-label fw-semibold">Organisation Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="company"
+              name="company"
+              placeholder="e.g. Acme Security Ltd"
+              maxlength="200"
+            />
+          </div>
+          <div class="col-md-4">
+            <label for="date" class="form-label fw-semibold">Assessment Date</label>
+            <input
+              type="date"
+              class="form-control"
+              id="date"
+              name="date"
+              value="{{ today }}"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score legend -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h6 class="fw-bold mb-2">Scoring Scale</h6>
+        <div class="row g-2 small">
+          <div class="col-auto">
+            <span class="badge bg-secondary px-2 py-1">0 &mdash; Not Available</span>
+            <span class="text-muted ms-1">No capability configured</span>
+          </div>
+          <div class="col-auto">
+            <span class="badge bg-warning text-dark px-2 py-1">1C &mdash; Collaborative</span>
+            <span class="text-muted ms-1">Analyst leads, AI assists</span>
+          </div>
+          <div class="col-auto">
+            <span class="badge bg-warning text-dark px-2 py-1">1G &mdash; Guide</span>
+            <span class="text-muted ms-1">AI suggests steps, analyst executes</span>
+          </div>
+          <div class="col-auto">
+            <span class="badge bg-primary px-2 py-1">1A &mdash; Approver</span>
+            <span class="text-muted ms-1">AI prepares action, analyst approves</span>
+          </div>
+          <div class="col-auto">
+            <span class="badge bg-success px-2 py-1">2 &mdash; Automated</span>
+            <span class="text-muted ms-1">Fully autonomous, no human needed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Domain accordions -->
+    <div class="accordion shadow-sm" id="domainsAccordion">
+      {% for domain_id, domain in domains.items() %}
+      {% set domain_actions = domain.actions %}
+      {% set action_count = domain_actions | length %}
+      <div class="accordion-item" data-domain="{{ domain_id }}" data-total="{{ action_count }}">
+        <h2 class="accordion-header" id="heading-{{ domain_id }}">
+          <button
+            class="accordion-button {% if not loop.first %}collapsed{% endif %}"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse-{{ domain_id }}"
+            aria-expanded="{{ 'true' if loop.first else 'false' }}"
+            aria-controls="collapse-{{ domain_id }}"
+          >
+            {{ domain.name }}
+            &nbsp;
+            <span
+              class="badge bg-light text-dark border ms-2 domain-badge"
+              id="badge-{{ domain_id }}"
+            >0 / {{ action_count }}</span>
+          </button>
+        </h2>
+        <div
+          id="collapse-{{ domain_id }}"
+          class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+          aria-labelledby="heading-{{ domain_id }}"
+          data-bs-parent="#domainsAccordion"
+        >
+          <div class="accordion-body p-3">
+            {% for action in domain_actions %}
+            <div class="action-row">
+              <span class="action-name">{{ action.name }}</span>
+              <div
+                class="score-group"
+                data-domain="{{ domain_id }}"
+                data-action="{{ action.id }}"
+              >
+                {% set field = "domain_" + domain_id + "_" + action.id %}
+                {% set scores = [
+                  ("0",  "Not Available",  "No capability configured"),
+                  ("1C", "Collaborative",  "Analyst leads, AI assists"),
+                  ("1G", "Guide",          "AI suggests steps, analyst executes"),
+                  ("1A", "Approver",       "AI prepares action, analyst approves"),
+                  ("2",  "Automated",      "Fully autonomous, no human needed")
+                ] %}
+                {% for val, label, tip in scores %}
+                <span
+                  class="score-option"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="top"
+                  title="{{ tip }}"
+                >
+                  <input
+                    type="radio"
+                    name="{{ field }}"
+                    id="{{ field }}_{{ val }}"
+                    value="{{ val }}"
+                    {% if val == "0" %}checked{% endif %}
+                    class="score-radio"
+                    data-domain="{{ domain_id }}"
+                  />
+                  <label for="{{ field }}_{{ val }}">{{ val if val != "0" else "0" }}</label>
+                </span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </form>
+</div>
+
+<!-- Fixed bottom bar -->
+<div id="bottom-bar" class="no-print">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+      <div class="flex-grow-1">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Overall Completion</span>
+          <span id="completion-text">0%</span>
+        </div>
+        <div class="progress">
+          <div
+            class="progress-bar bg-primary"
+            role="progressbar"
+            id="completion-bar"
+            style="width: 0%"
+            aria-valuenow="0"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
+        </div>
+      </div>
+      <button
+        type="submit"
+        form="assess-form"
+        class="btn btn-success btn-lg px-4 flex-shrink-0"
+        id="submit-btn"
+        disabled
+      >
+        Generate Report
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ---------------------------------------------------------------------------
+  // Initialise Bootstrap tooltips
+  // ---------------------------------------------------------------------------
+  (function () {
+    const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipEls.forEach(function (el) {
+      new bootstrap.Tooltip(el, { trigger: 'hover' });
+    });
+  })();
+
+  // ---------------------------------------------------------------------------
+  // Progress tracking
+  // ---------------------------------------------------------------------------
+  const TOTAL_ACTIONS = {{ total_actions }};
+
+  // Per-domain tracking
+  const domainTotals = {};
+  const domainAboveZero = {};
+
+  {% for domain_id, domain in domains.items() %}
+  domainTotals['{{ domain_id }}'] = {{ domain.actions | length }};
+  domainAboveZero['{{ domain_id }}'] = 0;
+  {% endfor %}
+
+  let globalAboveZero = 0;
+
+  function updateProgress() {
+    const pct = TOTAL_ACTIONS > 0 ? Math.round((globalAboveZero / TOTAL_ACTIONS) * 100) : 0;
+    document.getElementById('completion-bar').style.width = pct + '%';
+    document.getElementById('completion-bar').setAttribute('aria-valuenow', pct);
+    document.getElementById('completion-text').textContent = pct + '%';
+
+    // Enable submit only if at least one action is above 0
+    document.getElementById('submit-btn').disabled = (globalAboveZero === 0);
+  }
+
+  function updateDomainBadge(domainId) {
+    const count = domainAboveZero[domainId] || 0;
+    const total = domainTotals[domainId] || 0;
+    const badge = document.getElementById('badge-' + domainId);
+    if (badge) {
+      badge.textContent = count + ' / ' + total;
+      if (count === 0) {
+        badge.className = 'badge bg-light text-dark border ms-2 domain-badge';
+      } else if (count === total) {
+        badge.className = 'badge bg-success text-white ms-2 domain-badge';
+      } else {
+        badge.className = 'badge bg-warning text-dark ms-2 domain-badge';
+      }
+    }
+  }
+
+  // Track current values per action
+  const actionValues = {};
+
+  document.querySelectorAll('.score-radio').forEach(function (radio) {
+    const name = radio.name;
+    const domainId = radio.dataset.domain;
+
+    radio.addEventListener('change', function () {
+      const oldVal = actionValues[name];
+      const newVal = this.value;
+      actionValues[name] = newVal;
+
+      const wasAboveZero = (oldVal !== undefined && oldVal !== '0');
+      const isAboveZero = (newVal !== '0');
+
+      if (!wasAboveZero && isAboveZero) {
+        domainAboveZero[domainId] = (domainAboveZero[domainId] || 0) + 1;
+        globalAboveZero += 1;
+      } else if (wasAboveZero && !isAboveZero) {
+        domainAboveZero[domainId] = Math.max(0, (domainAboveZero[domainId] || 0) - 1);
+        globalAboveZero = Math.max(0, globalAboveZero - 1);
+      }
+
+      updateDomainBadge(domainId);
+      updateProgress();
+    });
+  });
+
+  // Initialise — all checked="0" by default, so all above-zero counts are 0
+  updateProgress();
+</script>
+{% endblock %}

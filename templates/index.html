@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}ARMM Assessment &mdash; AI SOC Maturity Evaluation{% endblock %}
+
+{% block extra_head %}
+<style>
+  .hero {
+    background: linear-gradient(135deg, #1a1f36 0%, #212529 100%);
+    color: #fff;
+    padding: 5rem 0 4rem;
+  }
+  .hero h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+  }
+  .hero p.lead {
+    color: #adb5bd;
+    max-width: 640px;
+  }
+  .feature-card {
+    border: none;
+    border-top: 4px solid;
+    border-radius: 0.5rem;
+    transition: transform 0.15s ease;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+  }
+  .feature-card.identity  { border-color: #6f42c1; }
+  .feature-card.domains   { border-color: #0d6efd; }
+  .feature-card.report    { border-color: #198754; }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+  .credits-section {
+    background-color: #e9ecef;
+    border-radius: 0.5rem;
+  }
+  .tier-badge {
+    display: inline-block;
+    padding: 0.25em 0.75em;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <p class="text-uppercase text-secondary small fw-semibold mb-2 ls-wider">
+      ARMM Framework &mdash; AI Response Maturity Model
+    </p>
+    <h1 class="mb-3">Evaluate your AI&nbsp;SOC maturity.</h1>
+    <p class="lead mb-4">
+      The ARMM Assessment tool helps security teams understand how well their AI
+      security operations capabilities are developed &mdash; across identity,
+      network, endpoint, cloud, SaaS, and general domains. Answer 80+ questions
+      and receive a professional maturity report in minutes.
+    </p>
+    <a href="{{ url_for('assess') }}" class="btn btn-primary btn-lg px-5">
+      Start Assessment
+    </a>
+  </div>
+</section>
+
+<!-- Feature cards -->
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-4">
+        <div class="card h-100 feature-card identity p-4 shadow-sm">
+          <div class="card-body text-center">
+            <span class="feature-icon">&#128272;</span>
+            <h5 class="card-title fw-bold">80+ Capabilities</h5>
+            <p class="card-text text-muted">
+              Evaluate every major AI SOC action across six response planes.
+              Each capability is rated on a proven 5-level maturity scale.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 feature-card domains p-4 shadow-sm">
+          <div class="card-body text-center">
+            <span class="feature-icon">&#128187;</span>
+            <h5 class="card-title fw-bold">6 Response Domains</h5>
+            <p class="card-text text-muted">
+              Identity, Network, Endpoint, Cloud, SaaS, and General options &mdash;
+              covering the full spectrum of modern SOC operations.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card h-100 feature-card report p-4 shadow-sm">
+          <div class="card-body text-center">
+            <span class="feature-icon">&#128202;</span>
+            <h5 class="card-title fw-bold">Actionable Report</h5>
+            <p class="card-text text-muted">
+              Receive your composite maturity tier, domain breakdown, and
+              prioritised recommendations for quick wins and tier progression.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Maturity tiers overview -->
+<section class="py-4 bg-white border-top border-bottom">
+  <div class="container">
+    <h2 class="h5 text-center fw-bold mb-3 text-muted text-uppercase">Maturity Tiers</h2>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <div class="text-center">
+        <span class="badge bg-secondary fs-6 px-3 py-2">Explorer</span>
+        <p class="small text-muted mt-1 mb-0">Just starting out</p>
+      </div>
+      <div class="text-center">
+        <span class="badge bg-warning text-dark fs-6 px-3 py-2">Entry</span>
+        <p class="small text-muted mt-1 mb-0">Core coverage &ge; 40%</p>
+      </div>
+      <div class="text-center">
+        <span class="badge bg-primary fs-6 px-3 py-2">Advanced</span>
+        <p class="small text-muted mt-1 mb-0">Broad automation &ge; 65%</p>
+      </div>
+      <div class="text-center">
+        <span class="badge bg-success fs-6 px-3 py-2">Expert</span>
+        <p class="small text-muted mt-1 mb-0">Highly automated &ge; 80%</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="h4 fw-bold text-center mb-4">How it works</h2>
+    <div class="row g-3 justify-content-center text-center">
+      <div class="col-md-3">
+        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:3rem;height:3rem;font-weight:700;">1</div>
+        <p class="fw-semibold mb-1">Rate each capability</p>
+        <p class="text-muted small">Choose from Not Available, Collaborative, Guide, Approver, or Automated for each action.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:3rem;height:3rem;font-weight:700;">2</div>
+        <p class="fw-semibold mb-1">Generate your report</p>
+        <p class="text-muted small">The ARMM scoring engine calculates your weighted score, coverage, and automation percentages.</p>
+      </div>
+      <div class="col-md-3">
+        <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:3rem;height:3rem;font-weight:700;">3</div>
+        <p class="fw-semibold mb-1">Act on recommendations</p>
+        <p class="text-muted small">Review prioritised quick wins and tier progression actions to improve your AI SOC posture.</p>
+      </div>
+    </div>
+    <div class="text-center mt-4">
+      <a href="{{ url_for('assess') }}" class="btn btn-outline-primary btn-lg px-5">
+        Begin Assessment
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Credits -->
+<section class="py-4">
+  <div class="container">
+    <div class="credits-section p-4 text-center">
+      <p class="mb-1 fw-semibold">About the ARMM Framework</p>
+      <p class="text-muted small mb-0">
+        The AI Response Maturity Model (ARMM) was developed by
+        <strong>Andrei Cotaie</strong>, <strong>Cristian Miron</strong>, and
+        <strong>Filip Stojkovski</strong> to provide a standardised way for
+        organisations to measure and improve their AI-assisted security
+        operations capabilities.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}
