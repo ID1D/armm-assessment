@@ -34,25 +34,32 @@ No technical knowledge is required to complete the assessment. The questionnaire
 
 ## Quick Start
 
-1. **Install Flask** (the only external dependency):
+1. **Clone the repository**:
+
+   ```
+   git clone https://github.com/ID1D/armm-assessment.git
+   cd armm-assessment
+   ```
+
+2. **Install Flask** (the only external dependency):
 
    ```
    pip install flask
    ```
 
-2. **Run the application**:
+3. **Run the application**:
 
    ```
    python app.py
    ```
 
-3. **Open your browser** and navigate to:
+4. **Open your browser** and navigate to:
 
    ```
    http://127.0.0.1:5000
    ```
 
-4. Click **Start Assessment**, complete the questionnaire, and click **Generate Report**.
+5. Click **Start Assessment**, complete the questionnaire, and click **Generate Report**.
 
 ---
 
@@ -76,8 +83,8 @@ The generated report includes:
 
 This tool is a standalone self-assessment companion to the broader ARMM ecosystem:
 
-- **armm-toolkit** (`C:\I-DID-LAB\armm-toolkit`): Contains the reference implementation of the ARMM scoring engine, playbooks, and capability definitions. The assessment tool's `scorer.py` and `recommender.py` replicate the core logic independently so that no toolkit dependency is required.
-- **mock-ai-soc** (`C:\I-DID-LAB\mock-ai-soc`): A simulated AI SOC environment. Assessment results exported as JSON can be loaded into mock-ai-soc to configure its capability level, or used to validate that mock scenarios match your real-world maturity rating.
+- **[armm-toolkit](https://github.com/ID1D/armm-toolkit)**: Contains the reference implementation of the ARMM scoring engine, playbooks, and capability definitions. The assessment tool's `scorer.py` and `recommender.py` replicate the core logic independently so that no toolkit dependency is required.
+- **[mock-ai-soc](https://github.com/ID1D/mock-ai-soc)**: A simulated AI SOC environment. Assessment results exported as JSON can be loaded into mock-ai-soc to configure its capability level, or used to validate that mock scenarios match your real-world maturity rating.
 
 To export results for use in mock-ai-soc, click **Export JSON** on the results page. The exported file contains the full scoring breakdown and per-action scores in a structured format.
 
