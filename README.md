@@ -18,7 +18,13 @@ No technical knowledge is required to complete the assessment. The questionnaire
 
 ## Credits
 
-The ARMM framework was developed by:
+**Tool built by:**
+
+| Author | GitHub |
+|--------|--------|
+| Diego Andrade | [@ID1D](https://github.com/ID1D) |
+
+**ARMM framework developed by:**
 
 - **Andrei Cotaie**
 - **Cristian Miron**
