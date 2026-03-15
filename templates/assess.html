@@ -189,10 +189,8 @@
           <button
             class="accordion-button {% if not loop.first %}collapsed{% endif %}"
             type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapse-{{ domain_id }}"
+            data-target="collapse-{{ domain_id }}"
             aria-expanded="{{ 'true' if loop.first else 'false' }}"
-            aria-controls="collapse-{{ domain_id }}"
           >
             {{ domain.name }}
             &nbsp;
@@ -205,8 +203,6 @@
         <div
           id="collapse-{{ domain_id }}"
           class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
-          aria-labelledby="heading-{{ domain_id }}"
-          data-bs-parent="#domainsAccordion"
         >
           <div class="accordion-body p-3">
             {% for action in domain_actions %}
@@ -226,12 +222,7 @@
                   ("2",  "Automated",      "Fully autonomous, no human needed")
                 ] %}
                 {% for val, label, tip in scores %}
-                <span
-                  class="score-option"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  title="{{ tip }}"
-                >
+                <span class="score-option">
                   <input
                     type="radio"
                     name="{{ field }}"
@@ -241,7 +232,7 @@
                     class="score-radio"
                     data-domain="{{ domain_id }}"
                   />
-                  <label for="{{ field }}_{{ val }}">{{ val if val != "0" else "0" }}</label>
+                  <label for="{{ field }}_{{ val }}" title="{{ tip }}">{{ val if val != "0" else "0" }}</label>
                 </span>
                 {% endfor %}
               </div>
@@ -293,72 +284,85 @@
 
 {% block extra_scripts %}
 <script>
+(function () {
   // ---------------------------------------------------------------------------
-  // Initialise Bootstrap tooltips
+  // Accordion — pure vanilla JS, no Bootstrap JS dependency
   // ---------------------------------------------------------------------------
-  (function () {
-    const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltipEls.forEach(function (el) {
-      new bootstrap.Tooltip(el, { trigger: 'hover' });
+  document.querySelectorAll('.accordion-button[data-target]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var panelId = btn.getAttribute('data-target');
+      var panel   = document.getElementById(panelId);
+      if (!panel) return;
+
+      var isOpen = panel.classList.contains('show');
+
+      // Close all panels
+      document.querySelectorAll('#domainsAccordion .accordion-collapse.show').forEach(function (el) {
+        el.classList.remove('show');
+      });
+      document.querySelectorAll('#domainsAccordion .accordion-button').forEach(function (b) {
+        b.classList.add('collapsed');
+        b.setAttribute('aria-expanded', 'false');
+      });
+
+      // Open clicked panel if it was closed
+      if (!isOpen) {
+        panel.classList.add('show');
+        btn.classList.remove('collapsed');
+        btn.setAttribute('aria-expanded', 'true');
+      }
     });
-  })();
+  });
 
   // ---------------------------------------------------------------------------
-  // Progress tracking
+  // Progress tracking — no Bootstrap JS dependency
   // ---------------------------------------------------------------------------
-  const TOTAL_ACTIONS = {{ total_actions }};
+  var TOTAL_ACTIONS = {{ total_actions }};
 
-  // Per-domain tracking
-  const domainTotals = {};
-  const domainAboveZero = {};
-
+  var domainTotals = {};
+  var domainAboveZero = {};
   {% for domain_id, domain in domains.items() %}
   domainTotals['{{ domain_id }}'] = {{ domain.actions | length }};
   domainAboveZero['{{ domain_id }}'] = 0;
   {% endfor %}
 
-  let globalAboveZero = 0;
+  var globalAboveZero = 0;
+  var actionValues = {};
 
   function updateProgress() {
-    const pct = TOTAL_ACTIONS > 0 ? Math.round((globalAboveZero / TOTAL_ACTIONS) * 100) : 0;
+    var pct = TOTAL_ACTIONS > 0 ? Math.round((globalAboveZero / TOTAL_ACTIONS) * 100) : 0;
     document.getElementById('completion-bar').style.width = pct + '%';
     document.getElementById('completion-bar').setAttribute('aria-valuenow', pct);
     document.getElementById('completion-text').textContent = pct + '%';
-
-    // Enable submit only if at least one action is above 0
     document.getElementById('submit-btn').disabled = (globalAboveZero === 0);
   }
 
   function updateDomainBadge(domainId) {
-    const count = domainAboveZero[domainId] || 0;
-    const total = domainTotals[domainId] || 0;
-    const badge = document.getElementById('badge-' + domainId);
-    if (badge) {
-      badge.textContent = count + ' / ' + total;
-      if (count === 0) {
-        badge.className = 'badge bg-light text-dark border ms-2 domain-badge';
-      } else if (count === total) {
-        badge.className = 'badge bg-success text-white ms-2 domain-badge';
-      } else {
-        badge.className = 'badge bg-warning text-dark ms-2 domain-badge';
-      }
+    var count = domainAboveZero[domainId] || 0;
+    var total = domainTotals[domainId] || 0;
+    var badge = document.getElementById('badge-' + domainId);
+    if (!badge) return;
+    badge.textContent = count + ' / ' + total;
+    if (count === 0) {
+      badge.className = 'badge bg-light text-dark border ms-2 domain-badge';
+    } else if (count === total) {
+      badge.className = 'badge bg-success text-white ms-2 domain-badge';
+    } else {
+      badge.className = 'badge bg-warning text-dark ms-2 domain-badge';
     }
   }
 
-  // Track current values per action
-  const actionValues = {};
-
   document.querySelectorAll('.score-radio').forEach(function (radio) {
-    const name = radio.name;
-    const domainId = radio.dataset.domain;
+    var name     = radio.name;
+    var domainId = radio.dataset.domain;
 
     radio.addEventListener('change', function () {
-      const oldVal = actionValues[name];
-      const newVal = this.value;
+      var oldVal = actionValues[name];
+      var newVal = this.value;
       actionValues[name] = newVal;
 
-      const wasAboveZero = (oldVal !== undefined && oldVal !== '0');
-      const isAboveZero = (newVal !== '0');
+      var wasAboveZero = (oldVal !== undefined && oldVal !== '0');
+      var isAboveZero  = (newVal !== '0');
 
       if (!wasAboveZero && isAboveZero) {
         domainAboveZero[domainId] = (domainAboveZero[domainId] || 0) + 1;
@@ -373,7 +377,7 @@
     });
   });
 
-  // Initialise — all checked="0" by default, so all above-zero counts are 0
   updateProgress();
+})();
 </script>
 {% endblock %}
